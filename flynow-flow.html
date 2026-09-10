@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FlyNow</title>
+<style>
+  :root{
+    --navy:#12203A;
+    --navy-2:#1B2E4F;
+    --cloud:#F3F5F9;
+    --paper:#FFFFFF;
+    --amber:#FFB100;
+    --amber-deep:#E08E00;
+    --teal:#1FB6A4;
+    --teal-deep:#158C7E;
+    --coral:#E5484D;
+    --ink:#12203A;
+    --slate:#5B6B87;
+    --line:#DCE2ED;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--cloud);
+    color:var(--ink);
+    min-height:100vh;
+    line-height:1.45;
+  }
+  button{font-family:inherit;}
+  a{color:inherit;}
+
+  .app{
+    max-width:720px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--paper);
+    box-shadow:0 0 60px rgba(18,32,58,0.08);
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* top bar */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 24px;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:700;
+    font-size:19px;
+    letter-spacing:-0.02em;
+    color:var(--navy);
+  }
+  .brand svg{width:22px;height:22px;flex-shrink:0;}
+  .progress{
+    display:flex;
+    gap:6px;
+  }
+  .progress span{
+    width:22px;height:4px;border-radius:2px;
+    background:var(--line);
+    transition:background .25s ease;
+  }
+  .progress span.done{background:var(--teal);}
+  .progress span.current{background:var(--amber);}
+
+  /* screens */
+  .screen{display:none;flex:1;flex-direction:column;}
+  .screen.active{display:flex;}
+  .screen-body{padding:28px 24px 20px;flex:1;}
+  .screen-foot{padding:16px 24px 28px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:12px;}
+
+  h1{font-size:26px;letter-spacing:-0.02em;margin:0 0 6px;color:var(--navy);}
+  h2{font-size:20px;letter-spacing:-0.01em;margin:28px 0 12px;color:var(--navy);}
+  p.lead{color:var(--slate);margin:0 0 22px;font-size:15px;max-width:46ch;}
+  label{display:block;font-size:13px;color:var(--slate);margin-bottom:6px;}
+  input[type=text], input[type=number], select{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    font-size:15px;
+    background:var(--cloud);
+    color:var(--ink);
+  }
+  input:focus, select:focus, button:focus, [tabindex]:focus{
+    outline:2px solid var(--navy-2);
+    outline-offset:2px;
+  }
+  .field{margin-bottom:16px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:13px 20px;
+    border-radius:10px;
+    border:none;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .08s ease, opacity .15s ease;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn-primary{background:var(--navy);color:#fff;}
+  .btn-primary:hover{background:var(--navy-2);}
+  .btn-primary:disabled{background:#B7C0D1;cursor:not-allowed;}
+  .btn-primary:disabled:active{transform:none;}
+  .btn-amber{background:var(--amber);color:var(--navy);}
+  .btn-amber:hover{background:var(--amber-deep);}
+  .btn-outline{background:transparent;color:var(--navy);border:1.5px solid var(--line);}
+  .btn-outline:hover{border-color:var(--navy);}
+  .btn-danger-outline{background:transparent;color:var(--coral);border:1.5px solid #F3C6C7;}
+  .btn-danger-outline:hover{border-color:var(--coral);}
+  .btn-block{width:100%;}
+
+  .exit-link{
+    text-align:center;
+    font-size:13px;
+    color:var(--slate);
+    text-decoration:underline;
+    background:none;border:none;cursor:pointer;
+    padding:4px;
+  }
+  .exit-link:hover{color:var(--coral);}
+
+  /* category grid (home) */
+  .categories{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:20px;
+  }
+  .cat-card{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px;
+    text-align:left;
+    background:var(--paper);
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .cat-card:hover{border-color:var(--navy-2);background:var(--cloud);}
+  .cat-card .icon{width:26px;height:26px;color:var(--teal-deep);}
+  .cat-card .title{font-weight:700;font-size:15px;color:var(--navy);}
+  .cat-card .desc{font-size:12.5px;color:var(--slate);}
+
+  /* hero / plane */
+  .hero{
+    background:linear-gradient(180deg,var(--navy) 0%, var(--navy-2) 100%);
+    border-radius:16px;
+    padding:26px 20px 20px;
+    color:#fff;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero .sky-dots{position:absolute;inset:0;opacity:.25;background-image:radial-gradient(#fff 1px, transparent 1px);background-size:26px 26px;}
+  .hero-inner{position:relative;z-index:1;}
+  .hero .tag{font-size:12.5px;color:#C9D3E6;margin-bottom:6px;}
+  .hero h1{color:#fff;margin-bottom:2px;}
+  .hero .sub{color:#C9D3E6;font-size:14px;margin-bottom:18px;}
+  .plane-wrap{display:flex;justify-content:center;padding:6px 0 2px;}
+  .plane-wrap svg{width:100%;max-width:420px;height:auto;}
+
+  /* boarding pass style */
+  .pass{
+    border:1px solid var(--line);
+    border-radius:16px;
+    position:relative;
+    background:var(--paper);
+    overflow:hidden;
+  }
+  .pass-notch{
+    position:absolute;
+    width:22px;height:22px;
+    background:var(--cloud);
+    border:1px solid var(--line);
+    border-radius:50%;
+    top:50%;transform:translateY(-50%);
+  }
+  .pass-notch.left{left:-11px;}
+  .pass-notch.right{right:-11px;}
+  .pass-dash{border-top:2px dashed var(--line);margin:0;}
+  .pass-top{padding:20px 22px 16px;}
+  .pass-bottom{padding:16px 22px 20px;display:flex;justify-content:space-between;align-items:center;}
+  .pass-route{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;color:var(--navy);letter-spacing:-0.01em;}
+  .pass-route .code{font-variant-numeric:tabular-nums;}
+  .pass-route svg{width:20px;height:20px;color:var(--teal-deep);flex-shrink:0;}
+  .pass-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:16px;}
+  .pass-meta div span{display:block;}
+  .pass-meta .k{font-size:11.5px;color:var(--slate);margin-bottom:2px;}
+  .pass-meta .v{font-size:14.5px;font-weight:600;color:var(--navy);}
+
+  /* calendar strip */
+  .cal-strip{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:4px 2px 10px;
+    margin:6px -2px 6px;
+  }
+  .cal-day{
+    flex:0 0 auto;
+    width:56px;
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:10px 0 8px;
+    text-align:center;
+    cursor:pointer;
+    background:var(--paper);
+  }
+  .cal-day .dow{font-size:11px;color:var(--slate);}
+  .cal-day .num{font-size:17px;font-weight:700;color:var(--navy);margin-top:2px;}
+  .cal-day.unavailable{background:#FBEDEE;border-color:#F3C6C7;cursor:not-allowed;}
+  .cal-day.unavailable .num, .cal-day.unavailable .dow{color:#C98F91;}
+  .cal-day.selected{background:var(--navy);border-color:var(--navy);}
+  .cal-day.selected .num, .cal-day.selected .dow{color:#fff;}
+
+  /* time slots */
+  .slot-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-top:6px;
+  }
+  .slot{
+    border:1.5px solid var(--teal);
+    color:var(--teal-deep);
+    border-radius:10px;
+    padding:11px 6px;
+    text-align:center;
+    font-size:14px;
+    font-weight:600;
+    background:#EFFBF9;
+    cursor:pointer;
+  }
+  .slot.unavailable{
+    border-color:#F3C6C7;
+    color:#C98F91;
+    background:#FBEDEE;
+    cursor:not-allowed;
+    text-decoration:line-through;
+  }
+  .slot.selected{
+    background:var(--navy);
+    border-color:var(--navy);
+    color:#fff;
+  }
+  .hint-row{display:flex;gap:16px;font-size:12.5px;color:var(--slate);margin-top:10px;}
+  .hint-row .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px;}
+  .dot.avail{background:var(--teal);}
+  .dot.unavail{background:var(--coral);}
+
+  /* payment */
+  .pay-methods{display:flex;gap:10px;margin-bottom:18px;}
+  .pay-method{
+    flex:1;border:1.5px solid var(--line);border-radius:10px;padding:13px;text-align:center;
+    cursor:pointer;font-size:14px;font-weight:600;color:var(--slate);
+  }
+  .pay-method.active{border-color:var(--navy);color:var(--navy);background:var(--cloud);}
+  .summary-line{display:flex;justify-content:space-between;font-size:14.5px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .summary-line.total{font-weight:700;color:var(--navy);border-bottom:none;padding-top:12px;}
+
+  /* status banner */
+  .status-banner{
+    border-radius:12px;
+    padding:16px 18px;
+    margin-bottom:18px;
+    font-size:14.5px;
+    display:flex;
+    gap:10px;
+    align-items:flex-start;
+  }
+  .status-banner.ok{background:#E9FAF6;color:var(--teal-deep);}
+  .status-banner.bad{background:#FBEDEE;color:#B8383D;}
+  .status-banner svg{width:20px;height:20px;flex-shrink:0;margin-top:1px;}
+
+  /* chat */
+  .chat-window{
+    border:1px solid var(--line);
+    border-radius:12px;
+    height:340px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .chat-log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--cloud);}
+  .msg{max-width:78%;padding:10px 13px;border-radius:12px;font-size:14px;}
+  .msg.bot{background:#fff;border:1px solid var(--line);align-self:flex-start;color:var(--ink);}
+  .msg.user{background:var(--navy);color:#fff;align-self:flex-end;}
+  .chat-options{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;border-top:1px solid var(--line);}
+  .chat-chip{
+    border:1.5px solid var(--line);
+    border-radius:999px;
+    padding:8px 14px;
+    font-size:13px;
+    background:#fff;
+    cursor:pointer;
+    color:var(--navy);
+  }
+  .chat-chip:hover{border-color:var(--navy);}
+
+  /* generic list */
+  .list-card{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    cursor:pointer;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .list-card:hover{border-color:var(--navy-2);}
+  .list-card .name{font-weight:600;font-size:14.5px;color:var(--navy);}
+  .list-card .sub{font-size:12.5px;color:var(--slate);margin-top:2px;}
+  .chev{width:16px;height:16px;color:var(--slate);flex-shrink:0;}
+
+  /* final confirmation */
+  .success-icon{
+    width:56px;height:56px;border-radius:50%;
+    background:#E9FAF6;
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:16px;
+  }
+  .success-icon svg{width:28px;height:28px;color:var(--teal-deep);}
+
+  .ticket-stub{margin-top:8px;}
+  .barcode{
+    height:34px;
+    margin-top:14px;
+    background-image:repeating-linear-gradient(90deg, var(--navy) 0 2px, transparent 2px 5px);
+    opacity:.75;
+  }
+
+  @media (max-width:480px){
+    .categories{grid-template-columns:1fr;}
+    .pass-meta{grid-template-columns:1fr 1fr;}
+    .row2{grid-template-columns:1fr;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2.5 2v1.5l3.5-1 3.5 1V21l-2.5-2v-5.5l8 2.5z"/></svg>
+      FlyNow
+    </div>
+    <div class="progress" id="progressDots"></div>
+  </div>
+
+  <!-- SCREEN 1: HOME -->
+  <section class="screen active" id="screen-home" data-step="home">
+    <div class="screen-body">
+      <div class="hero">
+        <div class="sky-dots"></div>
+        <div class="hero-inner">
+          <div class="tag">Boarding now</div>
+          <h1>FlyNow</h1>
+          <div class="sub">Fly further, for less. Book, manage or ask &mdash; all in one place.</div>
+          <div class="plane-wrap">
+            <svg viewBox="0 0 420 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FlyNow aeroplane">
+              <ellipse cx="210" cy="150" rx="150" ry="8" fill="#000" opacity="0.15"/>
+              <path d="M40 82 C40 60 70 50 120 50 L300 50 C340 50 365 62 380 80 C365 98 340 110 300 110 L120 110 C70 110 40 100 40 82 Z" fill="#F3F5F9"/>
+              <path d="M120 50 L100 20 L130 20 L155 50 Z" fill="#FFB100"/>
+              <path d="M120 110 L100 140 L130 140 L155 110 Z" fill="#FFB100"/>
+              <path d="M300 55 L360 30 L372 35 L335 62 Z" fill="#1FB6A4"/>
+              <path d="M300 105 L360 130 L372 125 L335 98 Z" fill="#1FB6A4"/>
+              <ellipse cx="382" cy="80" rx="10" ry="16" fill="#F3F5F9"/>
+              <text x="220" y="86" text-anchor="middle" font-family="-apple-system,Segoe UI,Roboto,sans-serif" font-size="20" font-weight="700" fill="#12203A" letter-spacing="1">FlyNow</text>
+              <circle cx="140" cy="66" r="4" fill="#12203A" opacity="0.15"/>
+              <circle cx="160" cy="66" r="4" fill="#12203A" opacity="0.15"/>
+              <circle cx="270" cy="66" r="4" fill="#12203A" opacity="0.15"/>
+              <circle cx="290" cy="66" r="4" fill="#12203A" opacity="0.15"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="categories" role="list">
+        <button class="cat-card" role="listitem" onclick="selectCategory('book')">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2.5 2v1.5l3.5-1 3.5 1V21l-2.5-2v-5.5l8 2.5z"/></svg>
+          <div class="title">Book a flight</div>
+          <div class="desc">Search routes, pick a date and time</div>
+        </button>
+        <button class="cat-card" role="listitem" onclick="selectCategory('manage')">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v2H4zM4 11h16v2H4zM4 18h10v2H4z"/></svg>
+          <div class="title">Manage booking</div>
+          <div class="desc">Reschedule or cancel a trip</div>
+        </button>
+        <button class="cat-card" role="listitem" onclick="selectCategory('chat')">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16v12H7l-3 3z"/></svg>
+          <div class="title">Talk to support</div>
+          <div class="desc">Chat with our travel team</div>
+        </button>
+        <button class="cat-card" role="listitem" onclick="selectCategory('checkin')">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <div class="title">Online check-in</div>
+          <div class="desc">Get your boarding pass early</div>
+        </button>
+        <button class="cat-card" role="listitem" onclick="selectCategory('status')">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l4 2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <div class="title">Flight status</div>
+          <div class="desc">Live updates on any flight</div>
+        </button>
+        <button class="cat-card" role="listitem" onclick="selectCategory('baggage')">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 4h6v3H9zM6 7h12v14H6z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+          <div class="title">Baggage help</div>
+          <div class="desc">Allowance, tracking, claims</div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCREEN 2a: BOOK - SEARCH + CALENDAR + SLOTS -->
+  <section class="screen" id="screen-book" data-step="book-search">
+    <div class="screen-body">
+      <h1>Where to?</h1>
+      <p class="lead">Choose your route, then pick a date and departure time.</p>
+
+      <div class="row2">
+        <div class="field">
+          <label for="origin">Flying from</label>
+          <select id="origin">
+            <option value="Abuja (ABV)">Abuja (ABV)</option>
+            <option value="Lagos (LOS)">Lagos (LOS)</option>
+            <option value="Port Harcourt (PHC)">Port Harcourt (PHC)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="destination">Flying to</label>
+          <select id="destination">
+            <option value="Lagos (LOS)">Lagos (LOS)</option>
+            <option value="Abuja (ABV)">Abuja (ABV)</option>
+            <option value="London (LHR)">London (LHR)</option>
+            <option value="Nairobi (NBO)">Nairobi (NBO)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="passengers">Passengers</label>
+        <input type="number" id="passengers" min="1" max="9" value="1">
+      </div>
+
+      <h2>Pick a date</h2>
+      <div class="cal-strip" id="calStrip"></div>
+      <div class="hint-row">
+        <span><span class="dot avail"></span>Available</span>
+        <span><span class="dot unavail"></span>Fully booked</span>
+      </div>
+
+      <h2>Pick a departure time</h2>
+      <div class="slot-grid" id="slotGrid"></div>
+      <div class="hint-row">
+        <span><span class="dot avail"></span>Open seats</span>
+        <span><span class="dot unavail"></span>Unavailable</span>
+      </div>
+    </div>
+    <div class="screen-foot">
+      <button class="btn btn-primary btn-block" id="bookContinueBtn" disabled onclick="submitBooking()">Continue to payment</button>
+      <button class="exit-link" onclick="abandon('book-search')">Not now, exit</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 2b: MANAGE - LOOKUP -->
+  <section class="screen" id="screen-manage-lookup" data-step="manage-lookup">
+    <div class="screen-body">
+      <h1>Manage booking</h1>
+      <p class="lead">Enter your booking reference and last name to pull up your trip.</p>
+      <div class="field">
+        <label for="pnr">Booking reference</label>
+        <input type="text" id="pnr" placeholder="e.g. FN7K2Q" maxlength="6">
+      </div>
+      <div class="field">
+        <label for="lastname">Last name</label>
+        <input type="text" id="lastname" placeholder="e.g. Adeyemi">
+      </div>
+      <p id="lookupError" style="color:var(--coral); font-size:13.5px; display:none;">We couldn't find a booking with those details &mdash; try FN7K2Q / Adeyemi for this demo.</p>
+    </div>
+    <div class="screen-foot">
+      <button class="btn btn-primary btn-block" onclick="submitLookup()">Find my booking</button>
+      <button class="exit-link" onclick="abandon('manage-lookup')">Not now, exit</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 3b: MANAGE - BOOKING DETAILS -->
+  <section class="screen" id="screen-manage-details" data-step="manage-details">
+    <div class="screen-body">
+      <h1>Your trip</h1>
+      <p class="lead">Reschedule to a new time, or cancel this booking.</p>
+
+      <div class="pass">
+        <div class="pass-notch left"></div>
+        <div class="pass-notch right"></div>
+        <div class="pass-top">
+          <div class="pass-route">
+            <span class="code">ABV</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2.5 2v1.5l3.5-1 3.5 1V21l-2.5-2v-5.5l8 2.5z"/></svg>
+            <span class="code">LOS</span>
+          </div>
+          <div class="pass-meta">
+            <div><span class="k">Reference</span><span class="v" id="mdRef">FN7K2Q</span></div>
+            <div><span class="k">Passenger</span><span class="v" id="mdName">Adeyemi</span></div>
+            <div><span class="k">Seat</span><span class="v">14C</span></div>
+          </div>
+          <div class="pass-meta">
+            <div><span class="k">Date</span><span class="v" id="mdDate">Sat, 12 Sep</span></div>
+            <div><span class="k">Time</span><span class="v" id="mdTime">08:30</span></div>
+            <div><span class="k">Status</span><span class="v" style="color:var(--teal-deep)">Confirmed</span></div>
+          </div>
+        </div>
+        <div class="pass-dash"></div>
+        <div class="pass-bottom">
+          <span style="font-size:12px;color:var(--slate)">Boarding closes 30 min before departure</span>
+        </div>
+      </div>
+
+      <h2>What would you like to do?</h2>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn btn-outline btn-block" onclick="startReschedule()">Reschedule this flight</button>
+        <button class="btn btn-danger-outline btn-block" onclick="startCancel()">Cancel this flight</button>
+      </div>
+    </div>
+    <div class="screen-foot">
+      <button class="exit-link" onclick="abandon('manage-details')">Not now, exit</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 3c: RESCHEDULE - CALENDAR + SLOTS -->
+  <section class="screen" id="screen-reschedule" data-step="reschedule">
+    <div class="screen-body">
+      <h1>Pick a new time</h1>
+      <p class="lead">Booking <strong>FN7K2Q</strong> &mdash; choose a new date and departure slot.</p>
+
+      <h2>New date</h2>
+      <div class="cal-strip" id="calStripReschedule"></div>
+      <h2>New time</h2>
+      <div class="slot-grid" id="slotGridReschedule"></div>
+      <div class="hint-row">
+        <span><span class="dot avail"></span>Open seats</span>
+        <span><span class="dot unavail"></span>Unavailable</span>
+      </div>
+    </div>
+    <div class="screen-foot">
+      <button class="btn btn-primary btn-block" id="rescheduleBtn" disabled onclick="confirmReschedule()">Confirm new time</button>
+      <button class="exit-link" onclick="abandon('reschedule')">Not now, exit</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 3d: CANCEL CONFIRM -->
+  <section class="screen" id="screen-cancel" data-step="cancel">
+    <div class="screen-body">
+      <h1>Cancel this flight?</h1>
+      <p class="lead">Booking <strong>FN7K2Q</strong>, ABV &rarr; LOS. Cancelling is free up to 24 hours before departure.</p>
+      <div class="status-banner bad">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <span>This can't be undone. A refund, if eligible, arrives in 5&ndash;7 business days.</span>
+      </div>
+    </div>
+    <div class="screen-foot">
+      <button class="btn btn-danger-outline btn-block" onclick="confirmCancel()" style="background:var(--coral); color:#fff; border-color:var(--coral);">Yes, cancel flight</button>
+      <button class="btn btn-outline btn-block" onclick="showScreen('screen-manage-details')">Keep my booking</button>
+      <button class="exit-link" onclick="abandon('cancel')">Not now, exit</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 2c: CHAT -->
+  <section class="screen" id="screen-chat" data-step="chat">
+    <div class="screen-body">
+      <h1>Talk to support</h1>
+      <p class="lead">Our assistant can answer most questions right away.</p>
+      <div class="chat-window">
+        <div class="chat-log" id="chatLog">
+          <div class="msg bot">Hi, I'm the FlyNow assistant. What do you need help with today?</div>
+        </div>
+        <div class="chat-options" id="chatOptions">
+          <button class="chat-chip" onclick="chatPick('Where is my refund?')">Where's my refund?</button>
+          <button class="chat-chip" onclick="chatPick('Can I add extra baggage?')">Add extra baggage</button>
+          <button class="chat-chip" onclick="chatPick('My flight was delayed')">My flight was delayed</button>
+        </div>
+      </div>
+    </div>
+    <div class="screen-foot">
+      <button class="btn btn-primary btn-block" onclick="endChat()">End chat</button>
+      <button class="exit-link" onclick="abandon('chat')">Not now, exit</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 2d: GENERIC (check-in / status / baggage) -->
+  <section class="screen" id="screen-generic" data-step="generic">
+    <div class="screen-body">
+      <h1 id="genTitle">Online check-in</h1>
+      <p class="lead" id="genLead">Enter your booking reference to check in and get your boarding pass.</p>
+      <div class="field">
+        <label for="genInput" id="genLabel">Booking reference</label>
+        <input type="text" id="genInput" placeholder="e.g. FN7K2Q">
+      </div>
+      <div id="genList"></div>
+    </div>
+    <div class="screen-foot">
+      <button class="btn btn-primary btn-block" onclick="submitGeneric()">Continue</button>
+      <button class="exit-link" onclick="abandon('generic')">Not now, exit</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 3a: PAYMENT -->
+  <section class="screen" id="screen-payment" data-step="payment">
+    <div class="screen-body">
+      <h1>Payment</h1>
+      <p class="lead">Review your trip, then pay to confirm your seat.</p>
+
+      <div class="summary-line"><span id="paySummaryRoute">ABV &rarr; LOS</span><span id="paySummaryDate">Sat, 12 Sep</span></div>
+      <div class="summary-line"><span>Departure</span><span id="paySummaryTime">08:30</span></div>
+      <div class="summary-line"><span>Passengers</span><span id="paySummaryPax">1</span></div>
+      <div class="summary-line total"><span>Total due</span><span id="paySummaryTotal">₦148,000</span></div>
+
+      <h2>Pay with</h2>
+      <div class="pay-methods">
+        <div class="pay-method active" id="method-card" onclick="setPayMethod('card')">Card</div>
+        <div class="pay-method" id="method-transfer" onclick="setPayMethod('transfer')">Bank transfer</div>
+      </div>
+
+      <div id="cardFields">
+        <div class="field">
+          <label for="cardNumber">Card number</label>
+          <input type="text" id="cardNumber" placeholder="4242 4242 4242 4242">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="cardExpiry">Expiry</label>
+            <input type="text" id="cardExpiry" placeholder="MM/YY">
+          </div>
+          <div class="field">
+            <label for="cardCvc">CVC</label>
+            <input type="text" id="cardCvc" placeholder="123">
+          </div>
+        </div>
+      </div>
+      <div id="transferFields" style="display:none;">
+        <div class="status-banner ok" style="margin-bottom:0;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="10" width="18" height="8" rx="1"/><path d="M3 10l9-6 9 6"/></svg>
+          <span>Transfer to FlyNow Ltd &mdash; Acct 0123456789, GTBank. Reference: <strong id="transferRef">FN7K2Q</strong>.</span>
+        </div>
+      </div>
+
+      <p id="payError" style="color:var(--coral); font-size:13.5px; display:none; margin-top:14px;">Your payment was declined. Please check your details or try another method.</p>
+    </div>
+    <div class="screen-foot">
+      <button class="btn btn-primary btn-block" onclick="submitPayment()">Pay now</button>
+      <button class="btn btn-outline btn-block" onclick="submitPayment(true)">Simulate decline (demo)</button>
+      <button class="exit-link" onclick="abandon('payment')">Not now, exit</button>
+    </div>
+  </section>
+
+  <!-- SCREEN 4/5: CONFIRMATION -->
+  <section class="screen" id="screen-confirm" data-step="confirm">
+    <div class="screen-body">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <h1 id="confirmHeadline">You're booked</h1>
+      <p class="lead" id="confirmSub">A confirmation has been sent to your email. Here's your ticket.</p>
+
+      <div class="pass ticket-stub" id="ticketCard">
+        <div class="pass-notch left"></div>
+        <div class="pass-notch right"></div>
+        <div class="pass-top">
+          <div class="pass-route">
+            <span class="code" id="tkFrom">ABV</span>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2.5 2v1.5l3.5-1 3.5 1V21l-2.5-2v-5.5l8 2.5z"/></svg>
+            <span class="code" id="tkTo">LOS</span>
+          </div>
+          <div class="pass-meta">
+            <div><span class="k">Reference</span><span class="v" id="tkRef">FN7K2Q</span></div>
+            <div><span class="k">Passenger</span><span class="v" id="tkName">You</span></div>
+            <div><span class="k">Seat</span><span class="v" id="tkSeat">14C</span></div>
+          </div>
+          <div class="pass-meta">
+            <div><span class="k">Date</span><span class="v" id="tkDate">Sat, 12 Sep</span></div>
+            <div><span class="k">Time</span><span class="v" id="tkTime">08:30</span></div>
+            <div><span class="k">Gate</span><span class="v">B4</span></div>
+          </div>
+          <div class="barcode"></div>
+        </div>
+      </div>
+    </div>
+    <div class="screen-foot">
+      <button class="btn btn-primary btn-block" onclick="startOver()">Start over</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+
+  // ---------- shared helpers ----------
+  function track(eventName, props){
+    if (window.posthog && typeof window.posthog.capture === 'function') {
+      try { window.posthog.capture(eventName, props || {}); } catch(e){ /* no-op */ }
+    }
+  }
+
+  window.abandon = function(stepName){
+    track('booking_abandoned', { step: stepName });
+    var proceed = window.confirm("Leave FlyNow now? You can always come back and finish later.");
+    if (proceed) {
+      resetState();
+      showScreen('screen-home');
+    }
+  };
+
+  var FLOW_STEPS = {
+    book:      ['screen-home','screen-book','screen-payment','screen-confirm'],
+    manage:    ['screen-home','screen-manage-lookup','screen-manage-details','screen-confirm'],
+    chat:      ['screen-home','screen-chat','screen-confirm'],
+    checkin:   ['screen-home','screen-generic','screen-confirm'],
+    status:    ['screen-home','screen-generic','screen-confirm'],
+    baggage:   ['screen-home','screen-generic','screen-confirm']
+  };
+
+  var state = {
+    flow: 'book',
+    selectedDate: null,
+    selectedTime: null,
+    rescheduleDate: null,
+    rescheduleTime: null,
+    payMethod: 'card',
+    pnr: 'FN7K2Q'
+  };
+
+  function resetState(){
+    state.flow = 'book';
+    state.selectedDate = null;
+    state.selectedTime = null;
+    state.rescheduleDate = null;
+    state.rescheduleTime = null;
+    state.payMethod = 'card';
+    document.getElementById('bookContinueBtn').disabled = true;
+    document.getElementById('payError').style.display = 'none';
+  }
+
+  function renderProgress(){
+    var steps = FLOW_STEPS[state.flow] || FLOW_STEPS.book;
+    var currentId = document.querySelector('.screen.active').id;
+    var idx = steps.indexOf(currentId);
+    var wrap = document.getElementById('progressDots');
+    wrap.innerHTML = '';
+    for (var i=0;i<steps.length;i++){
+      var dot = document.createElement('span');
+      if (i < idx) dot.className='done';
+      else if (i === idx) dot.className='current';
+      wrap.appendChild(dot);
+    }
+  }
+
+  window.showScreen = function(id){
+    var all = document.querySelectorAll('.screen');
+    for (var i=0;i<all.length;i++) all[i].classList.remove('active');
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+    renderProgress();
+  };
+
+  // ---------- date/time generation ----------
+  var DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var MONTH = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var TIMES = ['06:00','08:30','11:00','13:30','16:00','18:30','20:45'];
+
+  function buildDates(){
+    var out = [];
+    var base = new Date();
+    for (var i=1;i<=12;i++){
+      var d = new Date(base);
+      d.setDate(base.getDate()+i);
+      var unavailable = (d.getDay()===0) || (i===3) || (i===8); // Sundays + 2 fixed dates fully booked
+      out.push({
+        date: d,
+        label: DOW[d.getDay()],
+        num: d.getDate(),
+        month: MONTH[d.getMonth()],
+        unavailable: unavailable,
+        key: d.toISOString().slice(0,10)
+      });
+    }
+    return out;
+  }
+
+  function slotsForDate(dateKey){
+    // deterministic pseudo-availability based on date string
+    var seed = 0;
+    for (var i=0;i<dateKey.length;i++) seed += dateKey.charCodeAt(i);
+    return TIMES.map(function(t, idx){
+      var unavailable = ((seed + idx*7) % 5 === 0);
+      return { time:t, unavailable: unavailable };
+    });
+  }
+
+  function renderCalendar(containerId, onPick, selectedKeyGetter){
+    var container = document.getElementById(containerId);
+    container.innerHTML = '';
+    var days = buildDates();
+    days.forEach(function(d){
+      var el = document.createElement('div');
+      el.className = 'cal-day' + (d.unavailable ? ' unavailable' : '') + (selectedKeyGetter()===d.key ? ' selected' : '');
+      el.setAttribute('role','button');
+      el.setAttribute('tabindex', d.unavailable ? '-1' : '0');
+      el.innerHTML = '<div class="dow">'+d.label+'</div><div class="num">'+d.num+'</div>';
+      if (!d.unavailable){
+        el.addEventListener('click', function(day){ return function(){ onPick(day); }; }(d));
+      }
+      container.appendChild(el);
+    });
+  }
+
+  function renderSlots(containerId, dateKey, onPick, selectedTimeGetter){
+    var container = document.getElementById(containerId);
+    container.innerHTML = '';
+    if (!dateKey){
+      container.innerHTML = '<p style="color:var(--slate); font-size:13.5px; grid-column:1/-1;">Pick a date above to see times.</p>';
+      return;
+    }
+    var slots = slotsForDate(dateKey);
+    slots.forEach(function(s){
+      var el = document.createElement('div');
+      el.className = 'slot' + (s.unavailable ? ' unavailable' : '') + (selectedTimeGetter()===s.time ? ' selected' : '');
+      el.textContent = s.time;
+      el.setAttribute('role','button');
+      if (!s.unavailable){
+        el.addEventListener('click', function(time){ return function(){ onPick(time); }; }(s.time));
+      }
+      container.appendChild(el);
+    });
+  }
+
+  // ---------- HOME ----------
+  window.selectCategory = function(cat){
+    state.flow = cat;
+    track('home_category_selected', { category: cat });
+
+    if (cat === 'book'){
+      renderCalendar('calStrip', function(d){
+        state.selectedDate = d;
+        state.selectedTime = null;
+        document.getElementById('bookContinueBtn').disabled = true;
+        renderCalendar('calStrip', arguments.callee, function(){ return state.selectedDate ? state.selectedDate.key : null; });
+        renderSlots('slotGrid', d.key, onPickBookSlot, function(){ return state.selectedTime; });
+      }, function(){ return state.selectedDate ? state.selectedDate.key : null; });
+      renderSlots('slotGrid', null, function(){}, function(){ return state.selectedTime; });
+      showScreen('screen-book');
+    } else if (cat === 'manage'){
+      document.getElementById('lookupError').style.display='none';
+      document.getElementById('pnr').value='';
+      document.getElementById('lastname').value='';
+      showScreen('screen-manage-lookup');
+    } else if (cat === 'chat'){
+      showScreen('screen-chat');
+    } else {
+      setupGeneric(cat);
+      showScreen('screen-generic');
+    }
+  };
+
+  function onPickBookSlot(time){
+    state.selectedTime = time;
+    document.getElementById('bookContinueBtn').disabled = false;
+    renderSlots('slotGrid', state.selectedDate.key, onPickBookSlot, function(){ return state.selectedTime; });
+  }
+
+  window.submitBooking = function(){
+    if (!state.selectedDate || !state.selectedTime) return;
+    track('flight_search_completed', {
+      origin: document.getElementById('origin').value,
+      destination: document.getElementById('destination').value,
+      date: state.selectedDate.key,
+      time: state.selectedTime,
+      passengers: document.getElementById('passengers').value
+    });
+    var d = state.selectedDate;
+    document.getElementById('paySummaryRoute').textContent = shortCode(document.getElementById('origin').value) + ' \u2192 ' + shortCode(document.getElementById('destination').value);
+    document.getElementById('paySummaryDate').textContent = d.label + ', ' + d.num + ' ' + d.month;
+    document.getElementById('paySummaryTime').textContent = state.selectedTime;
+    document.getElementById('paySummaryPax').textContent = document.getElementById('passengers').value;
+    var pax = parseInt(document.getElementById('passengers').value || '1', 10);
+    document.getElementById('paySummaryTotal').textContent = '\u20a6' + (pax*74000).toLocaleString();
+    document.getElementById('payError').style.display='none';
+    showScreen('screen-payment');
+  };
+
+  function shortCode(v){
+    var m = v.match(/\(([^)]+)\)/);
+    return m ? m[1] : v;
+  }
+
+  // ---------- MANAGE ----------
+  window.submitLookup = function(){
+    var pnr = document.getElementById('pnr').value.trim().toUpperCase();
+    var name = document.getElementById('lastname').value.trim().toLowerCase();
+    track('booking_lookup_submitted', { reference: pnr });
+    if (pnr === 'FN7K2Q' && name === 'adeyemi'){
+      document.getElementById('lookupError').style.display='none';
+      showScreen('screen-manage-details');
+    } else {
+      document.getElementById('lookupError').style.display='block';
+    }
+  };
+
+  window.startReschedule = function(){
+    state.rescheduleDate = null;
+    state.rescheduleTime = null;
+    document.getElementById('rescheduleBtn').disabled = true;
+    renderCalendar('calStripReschedule', function(d){
+      state.rescheduleDate = d;
+      state.rescheduleTime = null;
+      document.getElementById('rescheduleBtn').disabled = true;
+      renderCalendar('calStripReschedule', arguments.callee, function(){ return state.rescheduleDate ? state.rescheduleDate.key : null; });
+      renderSlots('slotGridReschedule', d.key, onPickRescheduleSlot, function(){ return state.rescheduleTime; });
+    }, function(){ return state.rescheduleDate ? state.rescheduleDate.key : null; });
+    renderSlots('slotGridReschedule', null, function(){}, function(){ return state.rescheduleTime; });
+    showScreen('screen-reschedule');
+  };
+
+  function onPickRescheduleSlot(time){
+    state.rescheduleTime = time;
+    document.getElementById('rescheduleBtn').disabled = false;
+    renderSlots('slotGridReschedule', state.rescheduleDate.key, onPickRescheduleSlot, function(){ return state.rescheduleTime; });
+  }
+
+  window.confirmReschedule = function(){
+    if (!state.rescheduleDate || !state.rescheduleTime) return;
+    track('booking_rescheduled', { reference: state.pnr, new_date: state.rescheduleDate.key, new_time: state.rescheduleTime });
+    var d = state.rescheduleDate;
+    document.getElementById('confirmHeadline').textContent = 'Flight rescheduled';
+    document.getElementById('confirmSub').textContent = 'Your new departure time is confirmed. Updated ticket below.';
+    document.getElementById('tkFrom').textContent='ABV';
+    document.getElementById('tkTo').textContent='LOS';
+    document.getElementById('tkRef').textContent=state.pnr;
+    document.getElementById('tkName').textContent='Adeyemi';
+    document.getElementById('tkSeat').textContent='14C';
+    document.getElementById('tkDate').textContent = d.label + ', ' + d.num + ' ' + d.month;
+    document.getElementById('tkTime').textContent = state.rescheduleTime;
+    showScreen('screen-confirm');
+  };
+
+  window.startCancel = function(){
+    showScreen('screen-cancel');
+  };
+
+  window.confirmCancel = function(){
+    track('booking_cancelled', { reference: state.pnr });
+    document.getElementById('confirmHeadline').textContent = 'Flight cancelled';
+    document.getElementById('confirmSub').textContent = 'Booking ' + state.pnr + ' has been cancelled. Any refund will arrive in 5\u20137 business days.';
+    document.getElementById('ticketCard').style.display = 'none';
+    showScreen('screen-confirm');
+  };
+
+  // ---------- CHAT ----------
+  var chatResponses = {
+    "Where is my refund?": "Refunds for cancelled flights land back on your original payment method within 5\u20137 business days.",
+    "Can I add extra baggage?": "Yes \u2014 extra bags can be added from Manage booking for \u20a68,500 per 10kg.",
+    "My flight was delayed": "Sorry about that. Delays of over 2 hours qualify for meal vouchers \u2014 check Flight status for live updates."
+  };
+
+  window.chatPick = function(question){
+    var log = document.getElementById('chatLog');
+    var u = document.createElement('div');
+    u.className='msg user';
+    u.textContent = question;
+    log.appendChild(u);
+
+    var b = document.createElement('div');
+    b.className='msg bot';
+    b.textContent = chatResponses[question] || "Let me connect you with a live agent for that.";
+    log.appendChild(b);
+
+    log.scrollTop = log.scrollHeight;
+    track('chat_question_asked', { question: question });
+  };
+
+  window.endChat = function(){
+    track('chat_session_ended', {});
+    document.getElementById('confirmHeadline').textContent = 'Chat ended';
+    document.getElementById('confirmSub').textContent = "We've emailed you a transcript of this conversation.";
+    document.getElementById('ticketCard').style.display = 'none';
+    showScreen('screen-confirm');
+  };
+
+  // ---------- GENERIC (checkin / status / baggage) ----------
+  var genericCopy = {
+    checkin: { title:'Online check-in', lead:'Enter your booking reference to check in and get your boarding pass.', label:'Booking reference', placeholder:'e.g. FN7K2Q', doneHead:'Checked in', doneSub:'Your boarding pass has been emailed to you. See you at the gate.' },
+    status: { title:'Flight status', lead:'Enter a flight number to see live status.', label:'Flight number', placeholder:'e.g. FN204', doneHead:'Flight FN204: On time', doneSub:'Departing Gate B4 at the scheduled time. We\u2019ll notify you of any changes.' },
+    baggage: { title:'Baggage help', lead:'Enter your booking reference to check your allowance or report an issue.', label:'Booking reference', placeholder:'e.g. FN7K2Q', doneHead:'Baggage request received', doneSub:'Our team will follow up by email within 24 hours.' }
+  };
+
+  function setupGeneric(cat){
+    var c = genericCopy[cat];
+    document.getElementById('genTitle').textContent = c.title;
+    document.getElementById('genLead').textContent = c.lead;
+    document.getElementById('genLabel').textContent = c.label;
+    document.getElementById('genInput').placeholder = c.placeholder;
+    document.getElementById('genInput').value = '';
+  }
+
+  window.submitGeneric = function(){
+    var c = genericCopy[state.flow];
+    track('generic_action_completed', { category: state.flow, input: document.getElementById('genInput').value });
+    document.getElementById('confirmHeadline').textContent = c.doneHead;
+    document.getElementById('confirmSub').textContent = c.doneSub;
+    document.getElementById('ticketCard').style.display = (state.flow==='checkin') ? '' : 'none';
+    showScreen('screen-confirm');
+  };
+
+  // ---------- PAYMENT ----------
+  window.setPayMethod = function(method){
+    state.payMethod = method;
+    document.getElementById('method-card').classList.toggle('active', method==='card');
+    document.getElementById('method-transfer').classList.toggle('active', method==='transfer');
+    document.getElementById('cardFields').style.display = method==='card' ? '' : 'none';
+    document.getElementById('transferFields').style.display = method==='transfer' ? '' : 'none';
+  };
+
+  window.submitPayment = function(forceDecline){
+    track('payment_attempted', { method: state.payMethod });
+    var declined = !!forceDecline;
+    if (declined){
+      track('payment_declined', { method: state.payMethod });
+      document.getElementById('payError').style.display='block';
+      return;
+    }
+    track('payment_succeeded', { method: state.payMethod });
+    document.getElementById('payError').style.display='none';
+
+    var d = state.selectedDate;
+    document.getElementById('confirmHeadline').textContent = "You're booked";
+    document.getElementById('confirmSub').textContent = 'A confirmation has been sent to your email. Here\u2019s your ticket.';
+    document.getElementById('ticketCard').style.display = '';
+    document.getElementById('tkFrom').textContent = shortCode(document.getElementById('origin').value);
+    document.getElementById('tkTo').textContent = shortCode(document.getElementById('destination').value);
+    document.getElementById('tkRef').textContent = state.pnr;
+    document.getElementById('tkName').textContent = 'You';
+    document.getElementById('tkSeat').textContent = '14C';
+    document.getElementById('tkDate').textContent = d ? (d.label + ', ' + d.num + ' ' + d.month) : '\u2014';
+    document.getElementById('tkTime').textContent = state.selectedTime || '\u2014';
+
+    track('booking_confirmed', { reference: state.pnr });
+    showScreen('screen-confirm');
+  };
+
+  // ---------- START OVER ----------
+  window.startOver = function(){
+    track('flow_restarted', {});
+    resetState();
+    document.getElementById('ticketCard').style.display = '';
+    showScreen('screen-home');
+  };
+
+  // init
+  renderProgress();
+})();
+</script>
+
+<!-- PASTE POSTHOG SNIPPET HERE -->
+
+</body>
+</html>
