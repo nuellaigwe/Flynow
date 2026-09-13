@@ -874,8 +874,10 @@
       document.getElementById('lastname').value='';
       showScreen('screen-manage-lookup');
     } else if (cat === 'chat'){
+      track('support_flow_started', { channel: 'chat' });
       showScreen('screen-chat');
     } else {
+      track('support_flow_started', { channel: cat });
       setupGeneric(cat);
       showScreen('screen-generic');
     }
@@ -904,6 +906,7 @@
     var pax = parseInt(document.getElementById('passengers').value || '1', 10);
     document.getElementById('paySummaryTotal').textContent = '\u20a6' + (pax*74000).toLocaleString();
     document.getElementById('payError').style.display='none';
+    track('payment_flow_started', { method: state.payMethod });
     showScreen('screen-payment');
   };
 
@@ -926,6 +929,7 @@
   };
 
   window.startReschedule = function(){
+    track('reschedule_flow_started', { reference: state.pnr });
     state.rescheduleDate = null;
     state.rescheduleTime = null;
     document.getElementById('rescheduleBtn').disabled = true;
@@ -963,6 +967,7 @@
   };
 
   window.startCancel = function(){
+    track('cancellation_flow_started', { reference: state.pnr });
     showScreen('screen-cancel');
   };
 

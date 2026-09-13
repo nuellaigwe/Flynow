@@ -43,20 +43,24 @@ The first version should establish baselines rather than promise targets. Define
 | Booking completion rate | Users who complete booking after starting the booking flow | `booking_confirmed / booking_flow_started` |
 | Payment failure recovery rate | Users who complete payment after at least one declined attempt | `payment_failure_recovered / payment_declined` |
 | Support self-service resolution rate | Users who receive a self-service answer or completion without an agent | `support_self_service_completed / support entry users` |
-| Cancellation completion rate | Users who confirm cancellation after opening cancellation | `booking_cancelled / cancellation flow users` |
-| Rescheduling completion rate | Users who confirm a new date and time after starting rescheduling | `booking_rescheduled / rescheduling flow users` |
+| Cancellation completion rate | Users who confirm cancellation after opening cancellation | `booking_cancelled / cancellation_flow_started` |
+| Rescheduling completion rate | Users who confirm a new date and time after starting rescheduling | `booking_rescheduled / reschedule_flow_started` |
 
 ### Instrumented Events
 
 - `booking_flow_started`
 - `flight_search_completed`
+- `payment_flow_started`
 - `payment_attempted`
 - `payment_declined`
 - `payment_failure_recovered`
 - `payment_succeeded`
 - `booking_confirmed`
+- `support_flow_started`
 - `support_self_service_completed`
+- `cancellation_flow_started`
 - `booking_cancelled`
+- `reschedule_flow_started`
 - `booking_rescheduled`
 - `booking_abandoned`
 
@@ -84,7 +88,10 @@ These are intentionally deferred so the prototype can answer the narrower questi
 
 - **Booking:** `booking_flow_started` -> `flight_search_completed` -> `payment_succeeded` -> `booking_confirmed`
 - **Payment recovery:** `payment_declined` -> `payment_failure_recovered` -> `booking_confirmed`
-- **Support:** `home_category_selected` where `category` is `chat`, `checkin`, `status`, or `baggage` -> `support_self_service_completed`
-- **Trip changes:** `booking_cancelled` and `booking_rescheduled` as separate conversion trends
+- **Support:** `support_flow_started` -> `support_self_service_completed`, broken down by `channel`
+- **Cancellation:** `cancellation_flow_started` -> `booking_cancelled`
+- **Rescheduling:** `reschedule_flow_started` -> `booking_rescheduled`
+
+Create a separate **trend** for `payment_attempted`, `payment_declined`, `booking_abandoned`, and `chat_question_asked` to monitor friction and demand.
 
 The current build uses demo data and simulated outcomes. Treat the first PostHog results as usability evidence for the prototype, not as live commercial performance.
